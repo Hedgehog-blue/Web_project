@@ -13,10 +13,27 @@ export default function Poll({ specialties }) {
   }, []);
 
   const handleVote = () => {
-    if (selected) {
-      localStorage.setItem('votedSpecialty', selected);
-      setSubmitted(true);
-    }
+    if (!selected) return;
+
+    const username = localStorage.getItem('username') || 'Анонім';
+
+    fetch('http://localhost:3001/votes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username,
+        specialty: selected
+      })
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Помилка голосування');
+        localStorage.setItem('votedSpecialty', selected);
+        setSubmitted(true);
+      })
+      .catch(err => {
+        alert('Сталася помилка при голосуванні.');
+        console.error(err);
+      });
   };
 
   const handleReset = () => {
